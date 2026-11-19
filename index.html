@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="theme-color" content="#164f40"><link rel="manifest" href="manifest.json"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>رصيدي | مكافأة وقتك</title>
+<style>
+:root{--bg:#f3f6f5;--card:#fff;--ink:#18332d;--muted:#71817b;--green:#176b52;--green2:#e0f1e9;--gold:#b77a20;--gold2:#fff1d9;--border:#e2e9e5}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,Arial,sans-serif}
+main{max-width:900px;margin:30px auto;padding:0 16px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
+h1{margin:0;font-size:27px}.sub{color:var(--muted);margin-top:7px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px;margin-bottom:16px;box-shadow:0 4px 16px #173d2c08}
+.balance{background:linear-gradient(135deg,#164f40,#1c7156);color:white;border:0}
+.balance small{color:#d2e9df}.balance h2{font-size:42px;margin:12px 0}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px}
+.stat{background:#ffffff19;padding:14px;border-radius:14px}.stat span{display:block;color:#d7e9e1;font-size:13px}.stat b{display:block;font-size:22px;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.card h3{margin-top:0}
+button{border:0;border-radius:13px;padding:13px 16px;font-family:inherit;font-size:15px;font-weight:bold;cursor:pointer;background:var(--green);color:white}
+button.secondary{background:var(--green2);color:var(--green)}button.gold{background:var(--gold2);color:#75500e}button.danger{background:#fae7e5;color:#9d3028}button:disabled{opacity:.45;cursor:not-allowed}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.timer{font-size:32px;font-weight:bold;letter-spacing:1px;margin:14px 0}
+label{display:block;font-size:14px;margin:10px 0 6px;color:var(--muted)}input,select{width:100%;border:1px solid var(--border);background:white;border-radius:10px;padding:11px;font:inherit;color:var(--ink)}
+.history{width:100%;border-collapse:collapse;font-size:14px}.history th,.history td{text-align:right;border-bottom:1px solid var(--border);padding:12px 8px}.history th{color:var(--muted)}
+.empty{text-align:center;color:var(--muted);padding:22px}.note{color:var(--muted);font-size:13px;line-height:1.7}
+@media(max-width:650px){.grid,.stats{grid-template-columns:1fr}.top{align-items:flex-start}.timer{font-size:27px}}
+</style>
+</head>
+<body><main>
+<div class="top"><div><h1>رصيدي</h1><div class="sub">حوّل وقت عملك إلى وقت تستحقه</div></div><button class="secondary" onclick="openSettings()">⚙️ الإعدادات</button></div>
+<section class="card balance"><small>رصيد المكافآت المتاح</small><h2 id="balance">00:00:00</h2><small>هذا وقتك المكتسب الذي يمكنك استخدامه</small>
+<div class="stats"><div class="stat"><span>وقت العمل اليوم</span><b id="todayWork">00:00:00</b></div><div class="stat"><span>المكافأة المكتسبة اليوم</span><b id="todayReward">00:00:00</b></div></div></section>
+<div class="grid">
+<section class="card"><h3>💼 جلسة العمل</h3><div class="note">ابدأ جلسة عمل، وعند إنهائها تُضاف المكافأة إلى رصيدك.</div><div class="timer" id="workTimer">00:00:00</div><div class="controls"><button id="workStart" onclick="startWork()">▶ بدء العمل</button><button id="workStop" class="secondary" onclick="stopWork()" disabled>✓ إنهاء الجلسة</button></div></section>
+<section class="card"><h3>🎁 وقت المكافأة</h3><div class="note">استخدم رصيدك للراحة أو اللعب أو أي نشاط تختاره.</div><div class="timer" id="rewardTimer">00:00:00</div><div class="controls"><button id="rewardStart" class="gold" onclick="startReward()">▶ استخدام المكافأة</button><button id="rewardStop" class="secondary" onclick="stopReward()" disabled>■ إيقاف</button></div></section>
+</div>
+<section class="card" id="settingsCard" style="display:none"><h3>⚙️ إعدادات المكافأة</h3><label>نسبة المكافأة من وقت العمل</label><select id="ratio"><option value=".25">25% — 15 دقيقة لكل ساعة</option><option value=".5">50% — 30 دقيقة لكل ساعة</option><option value=".75">75% — 45 دقيقة لكل ساعة</option><option value="1">100% — ساعة لكل ساعة</option></select><div class="controls"><button onclick="saveRatio()">حفظ الإعداد</button><button class="secondary" onclick="closeSettings()">إغلاق</button></div><p class="note">تغيير النسبة يؤثر على جلسات العمل الجديدة فقط.</p></section>
+<section class="card"><h3>📜 سجل الجلسات</h3><table class="history"><thead><tr><th>التاريخ</th><th>نوع النشاط</th><th>المدة</th><th>المكافأة</th></tr></thead><tbody id="history"></tbody></table><div class="controls"><button class="danger" onclick="clearHistory()">مسح السجل</button></div></section>
+<p class="note">يُحفظ رصيدك وسجلك على هذا الجهاز والمتصفح. لا تمسح بيانات المتصفح إذا أردت الاحتفاظ بها.</p>
+</main>
+<script>
+const KEY="rasidi_v1";let data=load();let workStartAt=null,rewardStartAt=null;
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{balance:0,ratio:.5,history:[]}}catch{return{balance:0,ratio:.5,history:[]}}}
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+function fmt(s){s=Math.max(0,Math.floor(s));let h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return [h,m,x].map(v=>String(v).padStart(2,"0")).join(":")}
+function todayKey(){return new Date().toLocaleDateString("en-CA")}
+function render(){document.getElementById("balance").textContent=fmt(data.balance);let today=data.history.filter(x=>x.date===todayKey());document.getElementById("todayWork").textContent=fmt(today.filter(x=>x.type==="عمل").reduce((a,x)=>a+x.seconds,0));document.getElementById("todayReward").textContent=fmt(today.filter(x=>x.type==="عمل").reduce((a,x)=>a+x.reward,0));let tb=document.getElementById("history");tb.innerHTML=data.history.length?data.history.slice().reverse().map(x=>`<tr><td>${x.date}</td><td>${x.type}</td><td>${fmt(x.seconds)}</td><td>${x.type==="عمل"?fmt(x.reward):"—"}</td></tr>`).join(""):`<tr><td colspan="4" class="empty">لا توجد جلسات مسجلة بعد.</td></tr>`;document.getElementById("ratio").value=String(data.ratio)}
+function startWork(){if(rewardStartAt){alert("أوقف جلسة المكافأة أولًا.");return}workStartAt=Date.now();document.getElementById("workStart").disabled=true;document.getElementById("workStop").disabled=false}
+function stopWork(){if(!workStartAt)return;let secs=Math.floor((Date.now()-workStartAt)/1000);let reward=Math.floor(secs*data.ratio);data.balance+=reward;data.history.push({date:todayKey(),type:"عمل",seconds:secs,reward});workStartAt=null;save();document.getElementById("workStart").disabled=false;document.getElementById("workStop").disabled=true;document.getElementById("workTimer").textContent="00:00:00";render();alert(`تم تسجيل جلسة العمل. اكتسبت ${fmt(reward)} مكافأة.`)}
+function startReward(){if(data.balance<=0){alert("رصيد المكافأة غير كافٍ.");return}if(workStartAt){alert("أنه جلسة العمل أولًا.");return}rewardStartAt=Date.now();document.getElementById("rewardStart").disabled=true;document.getElementById("rewardStop").disabled=false}
+function stopReward(){if(!rewardStartAt)return;let secs=Math.floor((Date.now()-rewardStartAt)/1000);let used=Math.min(secs,data.balance);data.balance-=used;data.history.push({date:todayKey(),type:"مكافأة مستخدمة",seconds:used,reward:0});rewardStartAt=null;save();document.getElementById("rewardStart").disabled=false;document.getElementById("rewardStop").disabled=true;document.getElementById("rewardTimer").textContent="00:00:00";render();alert(`تم إيقاف المكافأة. استهلكت ${fmt(used)}.`)}
+function openSettings(){document.getElementById("settingsCard").style.display="block";document.getElementById("settingsCard").scrollIntoView({behavior:"smooth"})}function closeSettings(){document.getElementById("settingsCard").style.display="none"}function saveRatio(){data.ratio=Number(document.getElementById("ratio").value);save();render();closeSettings();alert("تم حفظ النسبة.")}
+function clearHistory(){if(confirm("هل تريد مسح السجل فقط؟ سيظل رصيد المكافأة محفوظًا.")){data.history=[];save();render()}}
+setInterval(()=>{if(workStartAt)document.getElementById("workTimer").textContent=fmt((Date.now()-workStartAt)/1000);if(rewardStartAt){let elapsed=(Date.now()-rewardStartAt)/1000;document.getElementById("rewardTimer").textContent=fmt(elapsed);document.getElementById("balance").textContent=fmt(data.balance-elapsed);if(elapsed>=data.balance)stopReward()}},500);
+render();
+</script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script></body></html>
